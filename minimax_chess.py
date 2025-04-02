@@ -114,7 +114,7 @@ def user_move_choice(board, event, selected_square):
 
     return move, selected_square
 #Define a function to get the list of attackers, returning a dictionary
-def check_attackers(board, color):
+'''def check_attackers(board, color):
     attacked_info = {}
     # For each square with a piece... 
     for square, piece in board.piece_map().items():
@@ -123,7 +123,7 @@ def check_attackers(board, color):
             enemy_attackers = board.attackers(not color, square)
             if enemy_attackers:
                 attacked_info[square] = enemy_attackers
-    return attacked_info
+    return attacked_info'''
 
 #Define a function that evaluates material and placement of pieces. This is to define the 3-depth minimax bot
 def evaluate_material(board):
@@ -238,10 +238,10 @@ def evaluate_material(board):
         # Calculate the positional bonus, and add it. 
         if piece.color == chess.WHITE:
             positional = piece_tables[piece.piece_type][square]
-            score += material + positional
+            score += 1.5*material + positional
         else:
             positional = piece_tables[piece.piece_type][square]
-            score -= material + positional
+            score -= 1.5*material + positional
     return score
 #Train engine to sometimes miss long moves, like a human would
 def is_long_move(move):
@@ -257,32 +257,24 @@ def is_long_move(move):
     elif piece == 'B' or piece == 'b':
         total = rank_diff  
         weight_list = [0, 1, 1, 0.99, 0.9, 0.6, 0.3]
-        if random.random() <= weight_list[total]:
-            return False
-        else:
-            return True  
     elif piece == 'r' or piece == 'R':
         total = max(rank_diff, file_diff) 
         weight_list = [0, 1, 1, 0.99, 0.9, 0.7, 0.5]
-        if random.random() <= weight_list[total]:
-            return False
-        else:
-            return True 
     elif piece == 'q' or piece == 'Q':
         if file_diff > 0 and rank_diff > 0:
             total = rank_diff  
             weight_list = [0, 1, 1, 0.99, 0.9, 0.6, 0.3]
-            if random.random() <= weight_list[total]:
-                return False
-            else:
-                return True  
         else:
             total = max(rank_diff, file_diff) 
             weight_list = [0, 1, 1, 0.99, 0.9, 0.7, 0.5]
-            if random.random() <= weight_list[total]:
-                return False
-            else:
-                return True 
+    else:
+        weight_list = []
+        total = 0
+    if weight_list != [] and total != 0:
+        if random.random() <= weight_list[total]:
+            return False
+        else:
+            return True  
         
 
 #Define another evaluation function, based on the first one 
@@ -332,7 +324,6 @@ def engine_move_choice(board, engine_color, depth=3):
             if board_value > best_value:
                 best_value = board_value
                 best_move = move
-                print("Found new best move:", best_move)
     else:
         best_value = float('inf')
         for move in board.legal_moves:
@@ -343,7 +334,6 @@ def engine_move_choice(board, engine_color, depth=3):
             if board_value < best_value:
                 best_value = board_value
                 best_move = move
-                print("Found new best move:", best_move, "depth=", depth)
     if best_move is None:
         best_move = random.choice(list(board.legal_moves))
     return best_move
@@ -353,6 +343,7 @@ running = True
 selected_square = None
 mate = False
 draw = False 
+saved_positions = {}
 
 while running:
     user_color, pieces, board, screen = start_game()
@@ -375,7 +366,10 @@ while running:
                     if move_choice is not None:
                         board.push(move_choice)
             elif not board.is_checkmate() and not board.is_stalemate():
-                board.push(engine_move_choice(board, engine_color, depth=3))
+                if len(board.piece_map()) <= 3:
+                    board.push(engine_move_choice(board, engine_color, depth=8))
+                elif len(board.piece_map()) > 3:
+                    board.push(engine_move_choice(board, engine_color, depth=3))
         if board.is_checkmate():
             draw_board()
             draw_pieces(board)
