@@ -256,17 +256,17 @@ def is_long_move(move):
         return False 
     elif piece == 'B' or piece == 'b':
         total = rank_diff  
-        weight_list = [0, 1, 1, 0.99, 0.9, 0.6, 0.3]
+        weight_list = [0, 1, 1, 0.99, 0.9, 0.85, 0.7, 0.6]
     elif piece == 'r' or piece == 'R':
         total = max(rank_diff, file_diff) 
-        weight_list = [0, 1, 1, 0.99, 0.9, 0.7, 0.5]
+        weight_list = [0, 1, 1, 0.99, 0.95, 0.9, 0.85, 0.8]
     elif piece == 'q' or piece == 'Q':
         if file_diff > 0 and rank_diff > 0:
             total = rank_diff  
-            weight_list = [0, 1, 1, 0.99, 0.9, 0.6, 0.3]
+            weight_list = [0, 1, 1, 0.99, 0.9, 0.85, 0.7, 0.6]
         else:
             total = max(rank_diff, file_diff) 
-            weight_list = [0, 1, 1, 0.99, 0.9, 0.7, 0.5]
+            weight_list = [0, 1, 1, 0.99, 0.95, 0.9, 0.85, 0.8]
     else:
         weight_list = []
         total = 0
@@ -311,7 +311,8 @@ def minimax(board, depth, alpha, beta, is_maximizing):
                 break
         return min_eval
 
-def engine_move_choice(board, engine_color, depth=3):
+# Change depth=n to whatever you want below 
+def engine_move_choice(board, engine_color, depth=4):
     best_move = None
     if engine_color == chess.WHITE:
         best_value = -float('inf')
